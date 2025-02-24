@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  llama:
+    image: ollama/llama:3.1  # Llama 이미지 (변경 필요할 수 있음)
+    container_name: llama
+    ports:
+      - "11434:11434"  # Llama 서비스 포트
+    environment:
+      - MODEL=llama_3.1_8B  # 모델 이름 (변경 필요할 수 있음)
+#    volumes:
+#      - llama_data:/data  # Llama 데이터 볼륨
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"  # Redis 포트
+
+  fastapi:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.9
+    container_name: fastapi
+    ports:
+      - "8000:80"  # FastAPI 포트
+    volumes:
+      - ./app:/app  # FastAPI 애플리케이션 코드
+    depends_on:
+      - redis
+      - mongo
+    environment:
+      - REDIS_HOST=redis
+      - MONGO_URI=mongodb://mongo:27017
+
+#  mongo:
+#    image: mongo:latest
+#    container_name: mongo
+#    ports:
+#      - "27017:27017"  # MongoDB 포트
+#    volumes:
+#      - mongo_data:/data/db  # MongoDB 데이터 볼륨
+#
+#  vectordb:
+#    image: milvusdb/milvus:latest  # Vector DB 이미지 (Milvus 예시)
+#    container_name: vectordb
+#    ports:
+#      - "19530:19530"  # Milvus 포트
+#    environment:
+#      - MILVUS_ENABLE_STORAGE=True
+#    depends_on:
+#      - mongo
+#
+#  streamlit:
+#    image: streamlit/streamlit:latest
+#    container_name: streamlit
+#    ports:
+#      - "8501:8501"  # Streamlit 포트
+#    volumes:
+#      - ./streamlit:/app  # Streamlit 애플리케이션 코드
+#    depends_on:
+#      - fastapi
+#    environment:
+#      - FASTAPI_URL=http://fastapi:8000  # FastAPI URL
+
+#volumes:
+#  llama_data:
+#  mongo_data:
